@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Environment — NEVER commit real secrets
+.env
+.env.local
+.env.production
+
+# Playwright outputs
+playwright-report/
+test-results/
+screenshots/
+logs/
+
+# Build artifacts
+dist/
+coverage/
