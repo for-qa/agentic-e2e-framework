@@ -6,6 +6,7 @@
 ![CI](https://github.com/for-qa/agentic-e2e-framework/actions/workflows/playwright.yml/badge.svg)
 [![Live Report](https://img.shields.io/badge/Playwright_Report-Live-2EAD33?style=flat&logo=playwright&logoColor=white)](https://for-qa.github.io/agentic-e2e-framework/)
 
+
 ---
 
 ## 🤖 How It Was Built
