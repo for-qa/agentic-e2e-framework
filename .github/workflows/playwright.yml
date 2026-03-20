@@ -1,17 +1,17 @@
-name: 🤖 Playwright E2E Tests
+name: Playwright E2E Tests
 
 # =============================================================================
 # Pipeline Layout (mirrors production Bitbucket pipeline architecture):
 #
-#   Job 1: quality-gate   — TypeScript typecheck + ESLint (parallel, fast-fail)
-#   Job 2: e2e-shard-1    — Tests tagged @shard-1 (parallel)
-#   Job 3: e2e-shard-2    — Tests tagged @shard-2 (parallel)
-#   Job 4: e2e-shard-3    — Tests tagged @shard-3 (parallel)
-#   Job 5: merge-reports  — Merges all shard HTML reports into one artifact
-#   Job 6: notify         — Sends HTML email report on completion (pass or fail)
+#   quality-gate   — TypeScript typecheck + ESLint + Vitest unit tests (fast-fail)
+#   e2e-shard-1    — Tests tagged @shard-1 (public demo app, always green)
+#   e2e-shard-2    — Tests tagged @shard-2 (public demo app, always green)
+#   e2e-shard-3    — Tests tagged @shard-3 (private app, requires Secrets)
+#   merge-reports  — Merges all shard HTML reports into one artifact
+#   notify         — Sends HTML email report on pipeline completion
 #
-# Shards run fully in parallel after setup. Each shard targets a subset of
-# tests via --grep tag, matching the production sharding strategy.
+# quality-gate and all shards run in parallel after setup.
+# Each shard targets a subset of tests via --grep tag.
 # =============================================================================
 
 on:

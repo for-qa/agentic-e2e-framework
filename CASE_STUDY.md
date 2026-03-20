@@ -123,6 +123,18 @@ After every pipeline run (pass or fail), an HTML email is automatically sent con
 
 The email service uses `nodemailer` with Gmail SMTP, configured via GitHub Secrets — no proprietary email infrastructure required.
 
+### Unit Testing the Framework Itself
+
+Unlike most QA automation portfolios that only test _applications_, this project also unit-tests its **own framework utilities** using Vitest:
+
+| Test File                          | Coverage                                      |
+| ---------------------------------- | --------------------------------------------- |
+| `retry.util.test.ts`               | 13 tests — all 3 retry strategies, edge cases |
+| `test-data-generator.util.test.ts` | 24 tests — all generator functions            |
+| `error.util.test.ts`               | 12 tests — all error handling paths           |
+
+This demonstrates that the automation framework is treated as **production-quality software**, not just a collection of test scripts. Unit tests run inside the CI quality-gate before any E2E shards start, providing fast feedback on regressions.
+
 ---
 
 ## 5. ISTQB CT-GenAI Competency Mapping
@@ -145,6 +157,7 @@ The email service uses `nodemailer` with Gmail SMTP, configured via GitHub Secre
 - ✅ Parallel sharding pipeline — 3 concurrent GitHub Actions shards
 - ✅ HTML email report sent automatically on every CI run
 - ✅ Live CI badge on README — pipeline is publicly verifiable
+- ✅ 49 unit tests covering framework utilities (retry, data generation, error handling)
 - ✅ Zero proprietary data in the public portfolio version
 
 ---

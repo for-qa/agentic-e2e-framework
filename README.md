@@ -74,12 +74,16 @@ agentic-e2e-framework/
 │       └── test-data-generator.util.ts
 │
 ├── tests/
-│   └── e2e/
-│       └── cases/
-│           ├── smoke-demo.case.ts           # @shard-1 / @shard-2 — runs in CI against public demo app
-│           └── records/
-│               ├── update-all-fields.case.ts   # Full CRUD field update (@shard-3)
-│               └── login-validation.case.ts     # Auth boundary tests
+│   ├── e2e/
+│   │   └── cases/
+│   │       ├── smoke-demo.case.ts           # @shard-1 / @shard-2 — runs in CI against public demo app
+│   │       └── records/
+│   │           ├── update-all-fields.case.ts   # Full CRUD field update (@shard-3)
+│   │           └── login-validation.case.ts     # Auth boundary tests
+│   └── unit/                            # Vitest unit tests — framework utilities
+│       ├── retry.util.test.ts           # 13 tests: backoff, fixed-delay, conditional
+│       ├── test-data-generator.util.test.ts  # 24 tests: strings, dates, emails, refs
+│       └── error.util.test.ts           # 12 tests: getErrorMessage, ensureError
 │
 ├── scripts/
 │   ├── ci/
