@@ -174,7 +174,6 @@ npm run report
 
 - All real URLs, credentials, and company identifiers have been removed.
 - Copy `.env.example` → `.env` and fill in your values. **Never commit a real `.env` file.**
-- The `dm-automation/` reference folder is excluded from git via `.gitignore`.
 
 ---
 

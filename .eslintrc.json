@@ -48,7 +48,6 @@
     "playwright-report/",
     "test-results/",
     "dist/",
-    "coverage/",
-    "dm-automation/"
+    "coverage/"
   ]
 }
