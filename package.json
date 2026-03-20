@@ -4,6 +4,19 @@
   "description": "Enterprise-grade Playwright E2E framework built 100% via AI Agent Orchestration. ISTQB CT-GenAI aligned.",
   "author": "Gairik Singha (for-qa)",
   "license": "MIT",
+  "keywords": [
+    "playwright",
+    "typescript",
+    "e2e-testing",
+    "test-automation",
+    "ai-agents",
+    "agentic-ai",
+    "clean-architecture",
+    "istqb",
+    "github-actions",
+    "vitest",
+    "prompt-engineering"
+  ],
   "scripts": {
     "test": "playwright test",
     "test:records": "playwright test --grep @records-update",
