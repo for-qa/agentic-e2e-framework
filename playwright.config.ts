@@ -1,20 +1,20 @@
 import { defineConfig, devices } from "@playwright/test";
-import * as path from "path";
 
 /**
- * Playwright Configuration — Agentic E2E Framework (Portfolio Demo)
+ * Playwright Configuration — Agentic E2E Framework
  * See: https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
   // ── Test Discovery ────────────────────────────────────────────────────────
   testDir: "./tests/e2e",
   testMatch: "**/*.case.ts",
+  globalSetup: "./global-setup.ts",
 
   // ── Execution Settings ────────────────────────────────────────────────────
-  fullyParallel: false,     // Serial by default — tests share page/session state
+  fullyParallel: false, // Serial by default — tests share page/session state
   workers: process.env["CI"] ? 2 : 4,
   retries: process.env["CI"] ? 1 : 0,
-  timeout: 120_000,         // 2 min default — heavy suites override per-test
+  timeout: 120_000, // 2 min default — heavy suites override per-test
 
   // ── Reporters ─────────────────────────────────────────────────────────────
   reporter: [
@@ -34,10 +34,6 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
-
-  // ── Path Aliases ──────────────────────────────────────────────────────────
-  // In production these are resolved via tsconfig paths + tsconfig-paths plugin.
-  // Shown here for documentation purposes.
 
   // ── Browser Projects ──────────────────────────────────────────────────────
   projects: [

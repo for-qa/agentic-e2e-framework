@@ -11,19 +11,18 @@
  * - A record can be saved using only mandatory fields
  * - Updated values persist correctly after save and page refresh
  *
- * PORTFOLIO DEMO — Sanitized template.
- * Domain: "Account Records" replaces the real company domain.
+ * Sanitized for public portfolio — see CASE_STUDY.md for context.
  */
 
-import type { TestSuiteConfiguration } from "../../models/test-suite.type";
-import { DEFAULT_TIMEOUTS, TestExecutionPriority } from "../../models/test-suite.type";
+import type { TestSuiteConfiguration } from "@src/models/test-suite.type";
+import { DEFAULT_TIMEOUTS, TestExecutionPriority } from "@src/models/test-suite.type";
 
 // ============================================================
 // View Mode Constants
 // ============================================================
 
 /** Update-record validation tests always run in "flat" (ungrouped) view. */
-export const RECORD_UPDATE_VIEW_MODE = "flat" as const;
+export const RECORD_UPDATE_VIEW_MODE = "flat";
 
 /** Returns the supported view modes for update-record tests. */
 export function getRecordUpdateViewModes(): ["flat"] {

@@ -13,7 +13,7 @@
  *   9. Assert that the drawer view has been fully reverted.
  *  10. Close the drawer cleanly.
  *
- * PORTFOLIO DEMO — Sanitized template.
+ * Sanitized for public portfolio — see CASE_STUDY.md for context.
  * Real page-object classes and locators have been replaced with
  * documented pseudo-implementations to clearly show the pattern.
  */
@@ -40,7 +40,9 @@ interface RecordFormSnapshot {
 function randomAmountDifferentFrom(current: number): number {
   const candidates = [100, 250, 500, 750, 1000, 1500, 2000];
   const filtered = candidates.filter((v) => v !== current);
-  return filtered[Math.floor(Math.random() * filtered.length)];
+  const pick = filtered[Math.floor(Math.random() * filtered.length)];
+  if (pick === undefined) throw new Error("No candidate amount available");
+  return pick;
 }
 
 /**
@@ -48,38 +50,32 @@ function randomAmountDifferentFrom(current: number): number {
  *  - Skeleton/loading overlay dismisses.
  *  - Network requests settle (networkidle).
  */
-async function waitForDrawerReady(
-  drawer: Locator,
-  _page: Page
-): Promise<void> {
+async function waitForDrawerReady(drawer: Locator, _page: Page): Promise<void> {
   // In the real implementation this checks for a skeleton locator + networkidle.
   // Shown here as a documented example of the pattern.
   await drawer.waitFor({ state: "visible", timeout: 30_000 });
-  // await page.waitForLoadState("networkidle");
 }
 
 /**
  * Captures current form field values into a snapshot object.
  * In production this reads actual Playwright locators inside the drawer.
  */
-async function captureFormSnapshot(
-  _drawer: Locator
-): Promise<RecordFormSnapshot> {
+function captureFormSnapshot(_drawer: Locator): Promise<RecordFormSnapshot> {
   // Pattern: read each editable field's current value via locator.inputValue()
   // or locator.textContent(), depending on field type.
-  return {
+  return Promise.resolve({
     totalAmount: 500,
     status: "Open",
     referenceId: "REF-20240101",
     assignedDate: "2024-01-01",
-  };
+  });
 }
 
 /**
  * Applies new values to all editable fields and clicks Save.
  * Returns the values that were applied (for later assertion).
  */
-async function applyUpdatesAndSave(
+function applyUpdatesAndSave(
   _drawer: Locator,
   _page: Page,
   snapshot: RecordFormSnapshot,
@@ -93,7 +89,7 @@ async function applyUpdatesAndSave(
   };
   // Pattern: fill each editable locator with updated.fieldName
   // then click the Save button and wait for the success toast/state change.
-  return updated;
+  return Promise.resolve(updated);
 }
 
 /**
@@ -101,10 +97,7 @@ async function applyUpdatesAndSave(
  * Checks that the Save/Cancel buttons have disappeared and
  * the Edit button is visible again.
  */
-async function waitForDrawerViewAfterSave(
-  _drawer: Locator,
-  _page: Page
-): Promise<void> {
+async function waitForDrawerViewAfterSave(_drawer: Locator, _page: Page): Promise<void> {
   // Pattern: await saveButton.waitFor({ state: "hidden" })
   //          await editButton.waitFor({ state: "visible" })
 }
@@ -127,10 +120,9 @@ async function assertDrawerMatchesSnapshot(
 async function revertToSnapshotAndSave(
   _drawer: Locator,
   _page: Page,
-  snapshot: RecordFormSnapshot
+  _snapshot: RecordFormSnapshot
 ): Promise<void> {
-  // Pattern: identical to applyUpdatesAndSave but uses snapshot values.
-  void snapshot; // suppress unused-var lint in the demo
+  // Pattern: identical to applyUpdatesAndSave but uses _snapshot values.
 }
 
 // ─── Main Controller ─────────────────────────────────────────────────────────
@@ -141,7 +133,7 @@ async function revertToSnapshotAndSave(
  */
 export async function validateUpdateAllFields(page: Page): Promise<void> {
   // ── Step 1: Navigate to the Records list in flat view ──────────────────────
-  await page.goto(process.env["BASE_URL"] + "records");
+  await page.goto("/records");
 
   // ── Step 2: Switch to flat (ungrouped) view ────────────────────────────────
   // In production: await tablePage.setGroupedView(false)
@@ -166,12 +158,7 @@ export async function validateUpdateAllFields(page: Page): Promise<void> {
   const newAmount = randomAmountDifferentFrom(snapshot.totalAmount);
 
   // ── Step 7: Apply updates & save ──────────────────────────────────────────
-  const editedValues = await applyUpdatesAndSave(
-    drawerLocator,
-    page,
-    snapshot,
-    newAmount
-  );
+  const editedValues = await applyUpdatesAndSave(drawerLocator, page, snapshot, newAmount);
   await waitForDrawerViewAfterSave(drawerLocator, page);
   await assertDrawerMatchesSnapshot(drawerLocator, page, editedValues);
 

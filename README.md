@@ -1,83 +1,158 @@
-# 🚀 Agentic E2E Framework — Portfolio Demo
+# 🚀 Agentic E2E Framework
 
-> **IMPORTANT:** This is a **sanitized architectural template** built to demonstrate the agentic QA engineering patterns used in a real enterprise SaaS product. All domain-specific data, credentials, and company identifiers have been replaced with generic examples. No proprietary information is included.
-
----
-
-## 🤖 Built with AI Agents
-
-This entire framework — including the file structure, TypeScript models, suite configs, controller patterns, and test cases — was **designed, architected, and implemented using AI Agent Orchestration.** The developer acted as a **Principal AI Orchestrator**, not a traditional coder.
+> **Enterprise-grade Playwright + TypeScript automation framework built 100% through AI Agent Orchestration.**
+> Sanitized for public portfolio — all domain data replaced with generic examples. See [CASE_STUDY.md](./CASE_STUDY.md) for full context.
 
 ---
 
-## 🏗️ Architecture Overview
+## 🤖 How It Was Built
+
+This entire framework — architecture, interfaces, controllers, page objects, and CI pipeline — was **designed and implemented using AI Agents**. The developer acted as a **Principal AI Orchestrator**: writing structured prompts, reviewing agent output, and correcting hallucinations.
+
+> See [CASE_STUDY.md](./CASE_STUDY.md) for the full agentic development process and ISTQB CT-GenAI competency mapping.
+
+---
+
+## 🏗️ Architecture
+
+Clean Architecture with strict layer separation. Each layer depends only on the one below it — never upward.
 
 ```
-portfolio-demo/
+agentic-e2e-framework/
+│
 ├── src/
-│   ├── models/               # TypeScript type definitions
-│   │   └── test-suite.type.ts
-│   ├── config/
+│   ├── domain/                          # 🔵 Core contracts (no external deps)
+│   │   ├── interfaces/
+│   │   │   ├── page.interface.ts        # IPage, ILocator — browser abstraction
+│   │   │   ├── logger.interface.ts      # ILogger — logging contract
+│   │   │   ├── config-service.interface.ts
+│   │   │   └── locator-resolver.interface.ts
+│   │   └── errors/
+│   │       └── test-execution.error.ts  # 9 typed domain error classes
+│   │
+│   ├── infrastructure/                  # 🟡 Concrete implementations
+│   │   ├── adapters/
+│   │   │   └── playwright-page.adapter.ts  # Wraps Playwright → IPage/ILocator
+│   │   ├── implementations/
+│   │   │   ├── logger.implementation.ts
+│   │   │   ├── config.implementation.ts
+│   │   │   └── locator-resolver.implementation.ts
+│   │   └── di/
+│   │       ├── service.container.ts     # Lightweight DI container
+│   │       └── di.bootstrap.ts          # Wires all services at startup
+│   │
+│   ├── models/                          # 🟢 Shared TypeScript types
+│   │   ├── test-suite.type.ts           # TestSuiteConfiguration, metadata
+│   │   ├── aria-role.type.ts            # Exhaustive ARIA role union
+│   │   └── view-mode.type.ts
+│   │
+│   ├── locators/                        # 🟠 CSS/role selector maps
+│   │   ├── common/navigation.locator.ts
 │   │   └── records/
-│   │       └── suites/
-│   │           └── record-update-suites.config.ts
-│   └── helpers/
-│       └── records/
-│           └── controllers/
-│               └── update-all-fields.controller.ts
+│   │       ├── records-table.locator.ts
+│   │       └── record-drawer.locator.ts
+│   │
+│   ├── pages/                           # 🔴 Page Object Models (POM)
+│   │   ├── common/navigation.page.ts
+│   │   └── records/
+│   │       ├── records-table.page.ts
+│   │       └── record-drawer.page.ts
+│   │
+│   ├── helpers/                         # 🟣 Test controllers (orchestration)
+│   │   └── records/controllers/
+│   │       └── update-all-fields.controller.ts
+│   │
+│   ├── config/                          # ⚙️  Suite & test configurations
+│   │   └── records/suites/
+│   │       └── record-update-suites.config.ts
+│   │
+│   └── utils/                           # 🔧 Shared utilities
+│       ├── error.util.ts
+│       ├── wait.util.ts
+│       └── test-data-generator.util.ts
+│
 ├── tests/
 │   └── e2e/
 │       └── cases/
 │           └── records/
-│               └── update-all-fields.case.ts
-├── .env.example              # Safe example — never commit real .env!
+│               ├── update-all-fields.case.ts   # Full CRUD field update
+│               └── login-validation.case.ts     # Auth boundary tests
+│
+├── global-setup.ts                      # Auth state bootstrap (runs once)
+├── playwright.config.ts
+├── .env.example
 ├── CASE_STUDY.md
-└── README.md
+└── .github/workflows/playwright.yml     # CI/CD pipeline
 ```
 
 ---
 
 ## ⚙️ Key Technical Highlights
 
-| Feature | Implementation |
-|---|---|
-| **Execution Engine** | Playwright + TypeScript |
-| **Suite Config** | Modular, metadata-driven `TestSuiteConfiguration` |
-| **Execution Mode** | Serial/Parallel with shard tagging |
-| **Priority Sorting** | Custom `sortTestsByExecutionOrder` algorithm |
-| **Snapshot Testing** | Capture → Update → Assert → Revert → Assert |
-| **Agent-Built** | 100% AI Agent Orchestration |
+| Feature                   | Implementation                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| **Clean Architecture**    | 8 strict layers — domain → infra → pages → tests                               |
+| **Dependency Inversion**  | All page objects depend on `IPage`, never Playwright directly                  |
+| **Typed Error Hierarchy** | 9 domain error classes for precise catch blocks                                |
+| **DI Container**          | Lightweight service container wired at startup                                 |
+| **Auth State Caching**    | `global-setup.ts` saves session per user — tests skip login                    |
+| **Suite Configuration**   | Declarative `TestSuiteConfiguration` drives execution order, retries, sharding |
+| **Snapshot Testing**      | Capture → Update → Assert → Revert → Assert pattern                            |
+| **Test Data Factory**     | Randomised, collision-free test data generators                                |
+| **Agent-Built**           | 100% AI Agent Orchestration                                                    |
 
 ---
 
-## 🧠 Agentic Development Process
+## 🚀 Getting Started
 
-1. **Requirement Ingestion:** AI agents parsed business Acceptance Criteria (AC) directly from user stories.
-2. **Architecture Generation:** Agents generated the modular file structure, TypeScript interfaces, and config schemas.
-3. **Controller Implementation:** Agents wrote the E2E controller logic mapping AC steps to Playwright actions.
-4. **Quality Refactoring:** AI automatically detected and reduced cognitive complexity to industry standard (≤ 15).
-5. **Risk Mitigation:** Human QA Engineer reviewed and corrected AI hallucinations and edge cases.
+### 1. Install dependencies
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+# Fill in BASE_URL and user credentials
+```
+
+### 3. Run tests
+
+```bash
+npm test                  # All tests (Chromium)
+npm run test:records      # Records domain only
+npm run test:smoke        # Smoke suite
+```
+
+### 4. View report
+
+```bash
+npm run report
+```
 
 ---
 
 ## 📋 ISTQB CT-GenAI Competency Mapping
 
-This project demonstrates the following **ISTQB Testing with Generative AI** competencies:
-
-- ✅ **Agent/Tool-Use Orchestration** — Multi-step agent workflows for code generation
-- ✅ **Prompt Engineering** — Structured prompts from AC to Playwright test cases
-- ✅ **LLM-Powered Test Infrastructure** — AI-generated modular test suite architecture
-- ✅ **Risk Mitigation / Hallucination Control** — Human verification of all AI output
-- ✅ **GenAI Integration into Test Organizations** — Reduced dev time significantly
-
----
-
-## 🔒 Security & Confidentiality Note
-
-- All real URLs, credentials, and company data have been removed.
-- Use `.env.example` as a template. **Never commit a real `.env` file.**
-- The `.gitignore` already excludes `.env` by default.
+| Syllabus Topic                  | Evidence                                          |
+| ------------------------------- | ------------------------------------------------- |
+| Agent/Tool-Use Orchestration    | All files generated through AI agent workflows    |
+| Prompt Engineering for Testing  | AC-to-code prompt patterns used throughout        |
+| LLM-Powered Test Infrastructure | AI-architected modular config + controller system |
+| Hallucination Risk Mitigation   | Human review and correction on all AI output      |
+| GenAI Integration into Test Org | Significantly reduced time to implementation      |
 
 ---
 
-*For professional inquiries, please connect on LinkedIn.*
+## 🔒 Security Note
+
+- All real URLs, credentials, and company identifiers have been removed.
+- Copy `.env.example` → `.env` and fill in your values. **Never commit a real `.env` file.**
+- The `dm-automation/` reference folder is excluded from git via `.gitignore`.
+
+---
+
+_For professional inquiries, connect on [LinkedIn](https://linkedin.com)._

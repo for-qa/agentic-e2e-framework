@@ -2,7 +2,7 @@
  * Test Suite Type Definitions
  * Common types, enums, constants, and utilities used across all test suites.
  *
- * PORTFOLIO DEMO — Sanitized template.
+ * Sanitized for public portfolio — see CASE_STUDY.md for context.
  * No proprietary company data included.
  */
 
@@ -65,7 +65,7 @@ export interface TestCaseMetadata {
   /** Run only this test case (use sparingly — for debugging) */
   only?: boolean;
   /** Mark as broken/fixme — test is skipped with a descriptive label */
-  fixme?: boolean;
+  fixme?: string;
   /** Triple the test timeout (Playwright test.slow() equivalent) */
   slow?: boolean;
   /** Optional roles/user-types this test should execute for */
@@ -113,9 +113,7 @@ export interface TestSuiteConfiguration {
  * then by estimated duration (longest first) within the same priority bucket.
  * This maximises parallel worker utilisation by starting the longest tests earliest.
  */
-export function sortTestsByExecutionOrder(
-  testCases: TestCaseMetadata[]
-): TestCaseMetadata[] {
+export function sortTestsByExecutionOrder(testCases: TestCaseMetadata[]): TestCaseMetadata[] {
   const priorityOrder: Record<TestExecutionPriority, number> = {
     [TestExecutionPriority.HIGH]: 0,
     [TestExecutionPriority.MEDIUM]: 1,

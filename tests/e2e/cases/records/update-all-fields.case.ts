@@ -20,20 +20,24 @@
  *   ADMIN_USER      — Admin user email
  *   ADMIN_PASS      — Admin user password
  *
- * PORTFOLIO DEMO — Sanitized template.
+ * Sanitized for public portfolio — see CASE_STUDY.md for context.
  */
 
 import type { Page } from "@playwright/test";
 import { test } from "@playwright/test";
-import { validateUpdateAllFields } from "../../../src/helpers/records/controllers/update-all-fields.controller";
+import { validateUpdateAllFields } from "@src/helpers/records/controllers/update-all-fields.controller";
 
 // ─── Test Registration ────────────────────────────────────────────────────────
 
+// Assertions are encapsulated in the controller function (architectural pattern).
+/* eslint-disable playwright/expect-expect */
 test.describe("@records-update — Account Record Update Suite", () => {
-  test(
-    "record-update-all-fields: update all editable fields and verify persistence",
-    async ({ page }: { page: Page }) => {
-      await validateUpdateAllFields(page);
-    }
-  );
+  test("record-update-all-fields: update all editable fields and verify persistence", async ({
+    page,
+  }: {
+    page: Page;
+  }) => {
+    await validateUpdateAllFields(page);
+  });
 });
+/* eslint-enable playwright/expect-expect */

@@ -2,17 +2,29 @@
   "name": "agentic-e2e-framework",
   "version": "1.0.0",
   "description": "Enterprise-grade Playwright E2E framework built 100% via AI Agent Orchestration. ISTQB CT-GenAI aligned.",
-  "author": "Gairik Singha (revolution-qa)",
+  "author": "Gairik Singha (for-qa)",
   "license": "MIT",
   "scripts": {
     "test": "playwright test",
     "test:records": "playwright test --grep @records-update",
     "test:smoke": "playwright test --grep @smoke",
     "test:ci": "playwright test --reporter=github",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "npm run typecheck && npm run lint && npm run format:check"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-playwright": "^1.6.0",
+    "prettier": "^3.2.0",
     "typescript": "^5.4.0"
   },
   "engines": {

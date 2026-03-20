@@ -2,7 +2,7 @@
 
 **Author Role:** Principal QA Architect (AI Orchestration)  
 **Domain:** Enterprise SaaS — Account Records Management (sanitized)  
-**Stack:** Playwright · TypeScript · Agentic AI Orchestration  
+**Stack:** Playwright · TypeScript · Agentic AI Orchestration
 
 ---
 
@@ -18,34 +18,39 @@ By acting as an **AI Orchestrator** rather than a traditional coder, the develop
 
 The target application had complex, state-dependent UI workflows including:
 
-| Challenge | Description |
-|---|---|
-| **Dynamic Data Persistence** | Field updates must survive page refreshes — assertions need pre/post snapshot comparison |
-| **Async UI States** | Detail drawers load progressively; naive selectors fail on skeleton-loading screens |
-| **Role-Based Access (RBAC)** | Different users (Admin, Analyst, Approver, Reviewer) see different field availability |
-| **Serial Execution Required** | Tests share application state — parallelism must be controlled per-suite |
+| Challenge                     | Description                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| **Dynamic Data Persistence**  | Field updates must survive page refreshes — assertions need pre/post snapshot comparison |
+| **Async UI States**           | Detail drawers load progressively; naive selectors fail on skeleton-loading screens      |
+| **Role-Based Access (RBAC)**  | Different users (Admin, Analyst, Approver, Reviewer) see different field availability    |
+| **Serial Execution Required** | Tests share application state — parallelism must be controlled per-suite                 |
 
 ---
 
 ## 3. Agentic Development Process
 
 ### Step 1 — Requirement Ingestion
+
 Business Acceptance Criteria (AC) were fed as structured prompts to AI agents.  
-*Example AC → Code mapping:*
+_Example AC → Code mapping:_
 
 > **AC:** "Capture original values → update each editable field → save → assert updated values persist after refresh"  
 > **Generated:** `captureFormSnapshot()` → `applyUpdatesAndSave()` → `waitForDrawerViewAfterSave()` → `assertDrawerMatchesSnapshot()`
 
 ### Step 2 — Architecture Generation
+
 Agents produced the modular folder structure, TypeScript interfaces (`TestSuiteConfiguration`, `TestCaseMetadata`), and all configuration schemas.
 
 ### Step 3 — Controller Implementation
+
 Agents wrote the full E2E controller, mapping each AC step to a Playwright action chain with proper wait strategies and error handling.
 
 ### Step 4 — Automated Quality Refactoring
+
 When cognitive complexity exceeded the allowed threshold (15), AI agents automatically refactored the code by extracting sub-functions — reducing complexity without changing behaviour.
 
 ### Step 5 — Human Risk Mitigation
+
 The developer reviewed all AI output for hallucinations, incorrect selectors, and edge cases — demonstrating the **Human-in-the-Loop** principle from ISTQB CT-GenAI.
 
 ---
@@ -53,6 +58,7 @@ The developer reviewed all AI output for hallucinations, incorrect selectors, an
 ## 4. Key Design Decisions
 
 ### Modular Suite Configuration
+
 Instead of hard-coding test metadata inside test files, all scheduling parameters are declared in a central `TestSuiteConfiguration` object. This allows CI/CD pipelines to re-order, shard, and prioritize tests without touching test logic.
 
 ```typescript
@@ -65,7 +71,9 @@ Instead of hard-coding test metadata inside test files, all scheduling parameter
 ```
 
 ### Snapshot-Based Assertion Pattern
+
 Rather than asserting fixed expected values, the framework:
+
 1. **Captures** the current state into a `snapshot` object.
 2. **Applies** changes.
 3. **Asserts** the new state matches the applied changes.
@@ -75,7 +83,9 @@ Rather than asserting fixed expected values, the framework:
 This makes tests data-independent and resilient to changes in test data.
 
 ### Shard-Ready Tagging
+
 Every test carries structurally meaningful tags:
+
 ```
 @shard-1-validation  →  validation tests on shard 1
 @records-update      →  domain filter
@@ -87,13 +97,13 @@ Every test carries structurally meaningful tags:
 
 ## 5. ISTQB CT-GenAI Competency Mapping
 
-| Syllabus Topic | Evidence from This Project |
-|---|---|
-| Agent/Tool-Use Orchestration | All files generated through AI agent workflows |
-| Prompt Engineering for Testing | AC-to-code prompt patterns used throughout |
+| Syllabus Topic                  | Evidence from This Project                         |
+| ------------------------------- | -------------------------------------------------- |
+| Agent/Tool-Use Orchestration    | All files generated through AI agent workflows     |
+| Prompt Engineering for Testing  | AC-to-code prompt patterns used throughout         |
 | LLM-Powered Test Infrastructure | Modular, AI-architected config + controller system |
-| Hallucination Risk Mitigation | Human review and correction pass on all AI output |
-| GenAI Integration into Test Org | Significantly reduced time to test implementation |
+| Hallucination Risk Mitigation   | Human review and correction pass on all AI output  |
+| GenAI Integration into Test Org | Significantly reduced time to test implementation  |
 
 ---
 
@@ -107,5 +117,5 @@ Every test carries structurally meaningful tags:
 
 ---
 
-*This case study represents a sanitized version of a real-world implementation.*  
-*For professional inquiries and live demonstrations, please connect on LinkedIn.*
+_This case study represents a sanitized version of a real-world implementation._  
+_For professional inquiries and live demonstrations, please connect on LinkedIn._
