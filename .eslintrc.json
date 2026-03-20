@@ -29,10 +29,17 @@
       }
     },
     {
-      "files": ["tests/**/*.ts"],
+      "files": ["tests/e2e/**/*.ts"],
       "extends": ["plugin:playwright/recommended"],
       "rules": {
         "@typescript-eslint/no-floating-promises": "error"
+      }
+    },
+    {
+      "files": ["tests/unit/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-explicit-any": "warn"
       }
     }
   ],

@@ -56,7 +56,9 @@ function isCacheValid(cachePath: string, maxAgeMinutes = 60): boolean {
 
 function loadUserCredentials(): Array<{ key: string; username: string; password: string }> {
   const users: Array<{ key: string; username: string; password: string }> = [];
-  const knownKeys = ["admin", "viewer", "editor"];
+  // Keys must match the env var prefix pattern: <KEY>_USER / <KEY>_PASS
+  // These align exactly with the roles defined in .env.example
+  const knownKeys = ["admin", "analyst", "approver", "reviewer"];
 
   for (const key of knownKeys) {
     const username = process.env[`${key.toUpperCase()}_USER`];

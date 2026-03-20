@@ -8,6 +8,12 @@
     "test": "playwright test",
     "test:records": "playwright test --grep @records-update",
     "test:smoke": "playwright test --grep @smoke",
+    "test:shard-1": "playwright test --grep @shard-1",
+    "test:shard-2": "playwright test --grep @shard-2",
+    "test:shard-3": "playwright test --grep @shard-3",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
     "test:ci": "playwright test --reporter=github",
     "report": "playwright show-report",
     "typecheck": "tsc --noEmit",
@@ -15,17 +21,24 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "validate": "npm run typecheck && npm run lint && npm run format:check"
+    "validate": "npm run typecheck && npm run lint && npm run format:check",
+    "validate:ci": "npm run typecheck && npm run lint && npm run test:unit"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0",
     "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.23",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^8.57.0",
     "eslint-plugin-playwright": "^1.6.0",
     "prettier": "^3.2.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -3,6 +3,8 @@
 > **Enterprise-grade Playwright + TypeScript automation framework built 100% through AI Agent Orchestration.**
 > Sanitized for public portfolio — all domain data replaced with generic examples. See [CASE_STUDY.md](./CASE_STUDY.md) for full context.
 
+![CI](https://github.com/for-qa/agentic-e2e-framework/actions/workflows/playwright.yml/badge.svg)
+
 ---
 
 ## 🤖 How It Was Built
@@ -74,32 +76,43 @@ agentic-e2e-framework/
 ├── tests/
 │   └── e2e/
 │       └── cases/
+│           ├── smoke-demo.case.ts           # @shard-1 / @shard-2 — runs in CI against public demo app
 │           └── records/
-│               ├── update-all-fields.case.ts   # Full CRUD field update
+│               ├── update-all-fields.case.ts   # Full CRUD field update (@shard-3)
 │               └── login-validation.case.ts     # Auth boundary tests
+│
+├── scripts/
+│   ├── ci/
+│   │   └── run-shard.sh                 # Universal shard runner for CI
+│   └── email/
+│       ├── email-report.ts              # Sends HTML report via Gmail SMTP
+│       └── email-template.ts            # Responsive HTML email template
 │
 ├── global-setup.ts                      # Auth state bootstrap (runs once)
 ├── playwright.config.ts
 ├── .env.example
 ├── CASE_STUDY.md
-└── .github/workflows/playwright.yml     # CI/CD pipeline
+└── .github/workflows/playwright.yml     # CI/CD pipeline (parallel sharding + email)
 ```
 
 ---
 
 ## ⚙️ Key Technical Highlights
 
-| Feature                   | Implementation                                                                 |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| **Clean Architecture**    | 8 strict layers — domain → infra → pages → tests                               |
-| **Dependency Inversion**  | All page objects depend on `IPage`, never Playwright directly                  |
-| **Typed Error Hierarchy** | 9 domain error classes for precise catch blocks                                |
-| **DI Container**          | Lightweight service container wired at startup                                 |
-| **Auth State Caching**    | `global-setup.ts` saves session per user — tests skip login                    |
-| **Suite Configuration**   | Declarative `TestSuiteConfiguration` drives execution order, retries, sharding |
-| **Snapshot Testing**      | Capture → Update → Assert → Revert → Assert pattern                            |
-| **Test Data Factory**     | Randomised, collision-free test data generators                                |
-| **Agent-Built**           | 100% AI Agent Orchestration                                                    |
+| Feature                   | Implementation                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| **Clean Architecture**    | 8 strict layers — domain → infra → pages → tests                                |
+| **Dependency Inversion**  | All page objects depend on `IPage`, never Playwright directly                   |
+| **Typed Error Hierarchy** | 9 domain error classes for precise catch blocks                                 |
+| **DI Container**          | Lightweight service container wired at startup                                  |
+| **Auth State Caching**    | `global-setup.ts` saves session per user — tests skip login                     |
+| **Suite Configuration**   | Declarative `TestSuiteConfiguration` drives execution order, retries, sharding  |
+| **Snapshot Testing**      | Capture → Update → Assert → Revert → Assert pattern                             |
+| **Test Data Factory**     | Randomised, collision-free test data generators                                 |
+| **Retry Strategies**      | `retryWithBackoff`, `retryWithFixedDelay`, `retryConditionally` utilities       |
+| **Performance Benchmark** | `PerformanceBenchmark` class measures FCP, LCP, API timing, saves JSON reports  |
+| **Unit Tests (Vitest)**   | 49 unit tests for framework utilities — CI-verified with 80% coverage threshold |
+| **Agent-Built**           | 100% AI Agent Orchestration                                                     |
 
 ---
 
@@ -122,9 +135,15 @@ cp .env.example .env
 ### 3. Run tests
 
 ```bash
-npm test                  # All tests (Chromium)
+# E2E tests (requires .env with BASE_URL + credentials)
+npm test                  # All E2E tests (Chromium)
 npm run test:records      # Records domain only
-npm run test:smoke        # Smoke suite
+npm run test:smoke        # Demo smoke suite (no credentials needed)
+
+# Unit tests (no dependencies needed)
+npm run test:unit         # Run all 49 Vitest unit tests
+npm run test:unit:watch   # Watch mode during development
+npm run test:unit:coverage  # Coverage report (80% thresholds)
 ```
 
 ### 4. View report
@@ -155,4 +174,4 @@ npm run report
 
 ---
 
-_For professional inquiries, connect on [LinkedIn](https://linkedin.com)._
+_For professional inquiries, connect on [LinkedIn](https://www.linkedin.com/in/gairik-singha/)._

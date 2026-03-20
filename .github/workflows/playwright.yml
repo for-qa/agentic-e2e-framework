@@ -1,59 +1,397 @@
 name: 🤖 Playwright E2E Tests
 
+# =============================================================================
+# Pipeline Layout (mirrors production Bitbucket pipeline architecture):
+#
+#   Job 1: quality-gate   — TypeScript typecheck + ESLint (parallel, fast-fail)
+#   Job 2: e2e-shard-1    — Tests tagged @shard-1 (parallel)
+#   Job 3: e2e-shard-2    — Tests tagged @shard-2 (parallel)
+#   Job 4: e2e-shard-3    — Tests tagged @shard-3 (parallel)
+#   Job 5: merge-reports  — Merges all shard HTML reports into one artifact
+#   Job 6: notify         — Sends HTML email report on completion (pass or fail)
+#
+# Shards run fully in parallel after setup. Each shard targets a subset of
+# tests via --grep tag, matching the production sharding strategy.
+# =============================================================================
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_email:
+        description: "Skip email notification"
+        required: false
+        default: "false"
 
 jobs:
-  test:
-    name: Run E2E Tests
+  # ── Quality Gate ─────────────────────────────────────────────────────────────
+  # Runs in parallel with shards. Fails fast if types or lint are broken.
+  quality-gate:
+    name: "Quality Gate: Typecheck & Lint"
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    timeout-minutes: 10
     steps:
-      # ── Checkout ───────────────────────────────────────────────────────────
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ── Node Setup ─────────────────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
 
-      # ── Install Dependencies ───────────────────────────────────────────────
       - name: Install dependencies
         run: npm ci
 
-      # ── Install Playwright Browsers ────────────────────────────────────────
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Unit Tests (Vitest)
+        run: npm run test:unit
+
+  # ── Global Auth Setup ─────────────────────────────────────────────────────
+  # Authenticates all configured users once and saves session state to cache.
+  # All shard jobs restore this cache so they skip login entirely.
+  setup:
+    name: "Setup: Auth State Bootstrap"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # ── Run Tests ──────────────────────────────────────────────────────────
-      - name: Run Playwright tests
-        run: npm run test:ci
+      - name: Run global auth setup
+        run: npx ts-node global-setup.ts
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
           ADMIN_USER: ${{ secrets.ADMIN_USER }}
           ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
+          ANALYST_USER: ${{ secrets.ANALYST_USER }}
+          ANALYST_PASS: ${{ secrets.ANALYST_PASS }}
+          APPROVER_USER: ${{ secrets.APPROVER_USER }}
+          APPROVER_PASS: ${{ secrets.APPROVER_PASS }}
+          REVIEWER_USER: ${{ secrets.REVIEWER_USER }}
+          REVIEWER_PASS: ${{ secrets.REVIEWER_PASS }}
 
-      # ── Upload Report ──────────────────────────────────────────────────────
-      - name: Upload Playwright HTML Report
+      - name: Upload auth state cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-state-cache
+          path: tests/.cache/
+          retention-days: 1
+
+  # ── E2E Shard 1 ───────────────────────────────────────────────────────────
+  # Auth boundary tests against the public Sauce Demo application.
+  # No credentials required — these tests run on every push and always show results.
+  e2e-shard-1:
+    name: "Shard 1/3: Auth Boundary Tests (Demo App)"
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download auth state cache
+        uses: actions/download-artifact@v4
+        with:
+          name: auth-state-cache
+          path: tests/.cache/
+        continue-on-error: true
+
+      - name: Run Shard 1 — Auth Boundary (Demo App)
+        run: bash scripts/ci/run-shard.sh
+        env:
+          SHARD_NUMBER: "1"
+          SHARD_TAG: "@shard-1"
+          # Public demo app — no private credentials needed
+          BASE_URL: "https://www.saucedemo.com"
+
+      - name: Upload shard 1 report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: playwright-report-shard-1
+          path: playwright-report-shard-1/
+          retention-days: 7
+
+      - name: Upload shard 1 exit code
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exit-code-shard-1
+          path: playwright_exit_code_shard_1.txt
+          retention-days: 1
+
+  # ── E2E Shard 2 ───────────────────────────────────────────────────────────
+  # Navigation & cart tests against the public Sauce Demo application.
+  # No credentials required — these tests run on every push.
+  e2e-shard-2:
+    name: "Shard 2/3: Navigation & Cart Tests (Demo App)"
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download auth state cache
+        uses: actions/download-artifact@v4
+        with:
+          name: auth-state-cache
+          path: tests/.cache/
+        continue-on-error: true
+
+      - name: Run Shard 2 — Navigation & Cart (Demo App)
+        run: bash scripts/ci/run-shard.sh
+        env:
+          SHARD_NUMBER: "2"
+          SHARD_TAG: "@shard-2"
+          # Public demo app — no private credentials needed
+          BASE_URL: "https://www.saucedemo.com"
+
+      - name: Upload shard 2 report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-shard-2
+          path: playwright-report-shard-2/
+          retention-days: 7
+
+      - name: Upload shard 2 exit code
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exit-code-shard-2
+          path: playwright_exit_code_shard_2.txt
+          retention-days: 1
+
+  # ── E2E Shard 3 ───────────────────────────────────────────────────────────
+  # Private app test suite — requires real credentials via GitHub Secrets.
+  # Tests gracefully skip when credentials are not provided (portfolio mode).
+  # Configure BASE_URL, ADMIN_USER, ADMIN_PASS in GitHub Secrets to activate.
+  e2e-shard-3:
+    name: "Shard 3/3: Private App Suite (requires Secrets)"
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download auth state cache
+        uses: actions/download-artifact@v4
+        with:
+          name: auth-state-cache
+          path: tests/.cache/
+        continue-on-error: true
+
+      - name: Run Shard 3 — Private App
+        run: bash scripts/ci/run-shard.sh
+        env:
+          SHARD_NUMBER: "3"
+          SHARD_TAG: "@shard-3"
+          # Set these GitHub Secrets to run against your real application:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
+          ANALYST_USER: ${{ secrets.ANALYST_USER }}
+          ANALYST_PASS: ${{ secrets.ANALYST_PASS }}
+          APPROVER_USER: ${{ secrets.APPROVER_USER }}
+          APPROVER_PASS: ${{ secrets.APPROVER_PASS }}
+          REVIEWER_USER: ${{ secrets.REVIEWER_USER }}
+          REVIEWER_PASS: ${{ secrets.REVIEWER_PASS }}
+
+      - name: Upload shard 3 report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-shard-3
+          path: playwright-report-shard-3/
+          retention-days: 7
+
+      - name: Upload shard 3 exit code
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exit-code-shard-3
+          path: playwright_exit_code_shard_3.txt
+          retention-days: 1
+
+  # ── Merge Reports ─────────────────────────────────────────────────────────
+  # Downloads all shard reports, merges them using Playwright's merge tool,
+  # and publishes a single combined HTML report as a pipeline artifact.
+  merge-reports:
+    name: "Merge & Publish Reports"
+    runs-on: ubuntu-latest
+    needs: [e2e-shard-1, e2e-shard-2, e2e-shard-3]
+    if: always()
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all shard reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-shard-*
+          path: all-shard-reports/
+          merge-multiple: false
+
+      - name: Download all exit codes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: exit-code-shard-*
+          path: exit-codes/
+          merge-multiple: false
+
+      - name: Collect overall exit code
+        run: |
+          OVERALL=0
+          for i in 1 2 3; do
+            CODE=$(cat "exit-codes/exit-code-shard-${i}/playwright_exit_code_shard_${i}.txt" 2>/dev/null || echo "0")
+            if [ "$CODE" -ne 0 ]; then
+              OVERALL=1
+              echo "[WARN] Shard ${i} reported failures (exit code: ${CODE})"
+            fi
+          done
+          echo "$OVERALL" > overall_exit_code.txt
+          [ "$OVERALL" -ne 0 ] && echo "[WARN] One or more shards had failures" || echo "[SUCCESS] All shards passed"
+
+      - name: Merge Playwright HTML reports
+        run: |
+          mkdir -p all-blobs
+          # Collect blob reports from each shard subfolder
+          for i in 1 2 3; do
+            BLOB_DIR="all-shard-reports/playwright-report-shard-${i}"
+            if [ -d "$BLOB_DIR" ]; then
+              cp -r "$BLOB_DIR" "all-blobs/shard-${i}" 2>/dev/null || true
+            fi
+          done
+          # Merge using Playwright's built-in merge-reports command
+          npx playwright merge-reports --reporter=html all-blobs --output merged-playwright-report 2>/dev/null || {
+            echo "[WARN] Merge failed, falling back to shard-1 report"
+            mkdir -p merged-playwright-report
+            cp -r all-shard-reports/playwright-report-shard-1/. merged-playwright-report/ 2>/dev/null || true
+          }
+
+      - name: Upload merged Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-merged
+          path: merged-playwright-report/
           retention-days: 14
 
-      # ── Upload Test Results (on failure) ───────────────────────────────────
-      - name: Upload test results on failure
+      - name: Upload overall exit code for notify job
         uses: actions/upload-artifact@v4
-        if: failure()
         with:
-          name: test-results
-          path: test-results/
-          retention-days: 7
+          name: overall-exit-code
+          path: overall_exit_code.txt
+          retention-days: 1
+
+  # ── Email Notification ───────────────────────────────────────────────────
+  # Sends an HTML email report after all shards complete (pass or fail).
+  # Uses Gmail App Password stored in GitHub Secrets (EMAIL_USER, EMAIL_PASS).
+  # Set SKIP_EMAIL=true in env or workflow_dispatch input to skip.
+  notify:
+    name: "Send Email Report"
+    runs-on: ubuntu-latest
+    needs: [merge-reports]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download overall exit code
+        uses: actions/download-artifact@v4
+        with:
+          name: overall-exit-code
+          path: .
+        continue-on-error: true
+
+      - name: Send email report
+        if: ${{ github.event.inputs.skip_email != 'true' }}
+        run: npx tsx scripts/email/email-report.ts
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          SKIP_EMAIL_REPORT: ${{ secrets.SKIP_EMAIL_REPORT }}

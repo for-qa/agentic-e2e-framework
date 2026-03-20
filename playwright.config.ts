@@ -19,6 +19,7 @@ export default defineConfig({
   // ── Reporters ─────────────────────────────────────────────────────────────
   reporter: [
     ["html", { outputFolder: "playwright-report", open: "never" }],
+    ["json", { outputFile: "playwright-report/results.json" }],
     ["list"],
     ...(process.env["CI"] ? [["github"] as ["github"]] : []),
   ],
@@ -36,15 +37,17 @@ export default defineConfig({
   },
 
   // ── Browser Projects ──────────────────────────────────────────────────────
+  // Chromium is always active. Firefox is opt-in via CROSS_BROWSER=true
+  // (e.g. pre-release checks) to keep CI shards fast by default.
   projects: [
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
+    // Firefox: enabled only when CROSS_BROWSER=true (set in CI workflow manually)
+    ...(process.env["CROSS_BROWSER"] === "true"
+      ? [{ name: "firefox", use: { ...devices["Desktop Firefox"] } }]
+      : []),
   ],
 
   // ── Output Directories ────────────────────────────────────────────────────

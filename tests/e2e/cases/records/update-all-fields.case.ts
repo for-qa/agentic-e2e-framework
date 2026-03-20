@@ -31,7 +31,7 @@ import { validateUpdateAllFields } from "@src/helpers/records/controllers/update
 
 // Assertions are encapsulated in the controller function (architectural pattern).
 /* eslint-disable playwright/expect-expect */
-test.describe("@records-update — Account Record Update Suite", () => {
+test.describe("@shard-3 @records-update — Account Record Update Suite", () => {
   test("record-update-all-fields: update all editable fields and verify persistence", async ({
     page,
   }: {
