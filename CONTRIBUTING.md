@@ -1,44 +1,24 @@
 # Contributing
 
-Thanks for your interest! This is a public portfolio project — contributions that improve the architecture demonstrations or documentation are welcome.
+First off, thank you for considering contributing! It's people like you that make this tool great.
 
-## Getting Started
+## How Can I Contribute?
 
-```bash
-npm install
-npx playwright install chromium
-cp .env.example .env   # fill in your values
-```
+### 1. Recognition and Support
+If this tool helps you in your daily work, the best way to support the author right now is through recognition! Starring the repository, sharing it with others, and providing attribution or a shoutout if you use the code are highly appreciated.
 
-## Scripts
+### 2. Reporting Bugs
+If you find a bug, please open an issue on GitHub. Include details about how to reproduce the bug, your environment, and what you expected to happen.
 
-| Command             | Description                     |
-| ------------------- | ------------------------------- |
-| `npm test`          | Run all tests                   |
-| `npm run typecheck` | TypeScript type check           |
-| `npm run lint`      | ESLint check                    |
-| `npm run format`    | Prettier format                 |
-| `npm run validate`  | Typecheck + lint + format check |
+### 3. Suggesting Enhancements
+If you have an idea for a new feature or an improvement, open an issue! We'd love to hear your thoughts.
 
-## Code Style
+### 4. Pull Requests
+If you want to contribute code to the project:
+1. Fork the repo and create your branch from `main`.
+2. Write your code and make sure it works! 
+3. Make sure the code passes any linting or testing steps.
+4. Submit a Pull Request with a clear description of what and why you are changing.
 
-- **TypeScript strict mode** — no `any`, no unchecked index access
-- **ESLint + Prettier** configured — run `npm run validate` before committing
-- **EditorConfig** — ensure your editor respects `.editorconfig` settings
-
-## Branch & PR Conventions
-
-- Branch from `main`
-- Name branches: `feat/`, `fix/`, `docs/`
-- Keep PRs focused on a single concern
-
-## Architecture Principles
-
-This project follows **Clean Architecture**. When adding new code:
-
-- **Domain layer** (`src/domain/`) — no external imports, only TypeScript primitives
-- **Infrastructure layer** — implements domain interfaces; only place Playwright is imported
-- **Locators** — CSS/role selectors only, no interaction logic
-- **Pages (POM)** — interaction logic only, no assertions
-- **Helpers/Controllers** — orchestration only, calls POM methods
-- **Tests** — call one controller function; no direct page interaction
+## License Agreement for Contributions
+By contributing code to this repository, you agree that your contributions will be licensed under the project's MIT License.
