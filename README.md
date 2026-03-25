@@ -15,6 +15,13 @@ This entire framework — architecture, interfaces, controllers, page objects, a
 
 > See [CASE_STUDY.md](./CASE_STUDY.md) for the full agentic development process and ISTQB CT-GenAI competency mapping.
 
+## 🛠️ Tech Stack
+
+- **E2E Automation**: Playwright Test Runner
+- **Language**: TypeScript (Node.js 20+)
+- **Unit Testing**: Vitest (for framework utilities)
+- **CI/CD Integration**: GitHub Actions with custom Nodemailer reporting
+
 ---
 
 ## 🏗️ Architecture
